@@ -20,6 +20,8 @@ namespace MidiUtils {
     
     private:
         struct FileHeader header;
+        void MTrkReader(istream& istream);
+        uint32_t noteCnt = 0; // test for now
     };
 
 }

@@ -2,8 +2,12 @@
 #define _MIDIUTILS_HPP
 
 #include <cinttypes>
+#include <istream>
+#include <fstream>
 
 typedef unsigned char byte;
+
+using namespace std;
 
 namespace MidiUtils {
 
@@ -56,6 +60,7 @@ namespace MidiUtils {
 
     uint16_t byte2_to_uint16(byte* buffer);
     uint32_t byte4_to_uint32(byte* buffer);
+    uint32_t readVariableLengthQuantity(istream& istream);
 
 }
 
