@@ -26,4 +26,10 @@ namespace MidiUtils {
         return ret;
     }
 
+    std::string PrettyKeySignature(int16_t keysign) {
+        int8_t flatsharp = keysign >> 8;
+        int8_t majerminor = keysign & 0x00FF;
+        return std::to_string(flatsharp) + " " + std::to_string(majerminor); 
+    }
+
 }

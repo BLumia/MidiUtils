@@ -28,19 +28,7 @@ namespace MidiUtils {
 
     enum EventType {
         E_INVALID = -1,
-        NOTE_OFF = 0x80,           //1000xxxx 8x (Key is pressed)
-        NOTE_ON = 0x90,            //1001xxxx 9x (Key is released)
-        KEY_PRESSURE = 0xA0,       //1010xxxx Ax (aka. Key after-touch)
-        CONTROL_CHANGE = 0xB0,     //1011xxxx Bx
-        PROGRAM_CHANGE = 0xC0,     //1100xxxx Cx (aka. Patch change)
-        CHANNEL_PRESSURE = 0xD0,   //1101xxxx Dx (any midifile use it?)
-        PITCH_WHEEL_CHANGE = 0xE0, //1110xxxx Ex
-        META,
-        SYSEX
-    };
-
-    enum MetaType {
-        M_INVALID = -1,
+        // Meta Types:
         SEQUENCE_NUM = 0x00,
         TEXT_EVENT = 0x01,
         COPYRIGHT = 0x02,
@@ -55,12 +43,22 @@ namespace MidiUtils {
         SMTPE_OFFSET = 0x54,
         TIME_SIGNATURE = 0x58,
         KEY_SIGNATURE = 0x59,
-        Sequencer_Specific_Meta_event = 0x7F
+        Sequencer_Specific_Meta_event = 0x7F,
+        // Normal Midi Event Types:
+        NOTE_OFF = 0x80,           //1000xxxx 8x (Key is pressed)
+        NOTE_ON = 0x90,            //1001xxxx 9x (Key is released)
+        KEY_PRESSURE = 0xA0,       //1010xxxx Ax (aka. Key after-touch)
+        CONTROL_CHANGE = 0xB0,     //1011xxxx Bx
+        PROGRAM_CHANGE = 0xC0,     //1100xxxx Cx (aka. Patch change)
+        CHANNEL_PRESSURE = 0xD0,   //1101xxxx Dx (any midifile use it?)
+        PITCH_WHEEL_CHANGE = 0xE0, //1110xxxx Ex
+        SYSEX
     };
 
     uint16_t byte2_to_uint16(byte* buffer);
     uint32_t byte4_to_uint32(byte* buffer);
     uint32_t readVariableLengthQuantity(istream& istream);
+    std::string PrettyKeySignature(int16_t keysign);
 
 }
 

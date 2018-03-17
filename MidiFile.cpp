@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstring>
 #include "MidiFile.hpp"
+#include "MidiEvent.hpp"
 
 using namespace std;
 
@@ -113,24 +114,28 @@ retry:
                     //cout<<"\tNOTE_ON" << endl;
                 } else {
                     // a NOTE_ON with zero velocity will be set as a NOTE_OFF
-                    cout<<"\tNOTE_OFF(from NON)" << endl;
+                    MidiEvent a(eventDeltaTime, evtType, para1, para2);
+                    cout<<"\tNOTE_OFF(from NON)\t" << a.toString() << endl;
                 }
                 break;
             case KEY_PRESSURE:
             case CONTROL_CHANGE:
                 istream.read((char*)&para1, 1);
                 istream.read((char*)&para2, 1);
-                cout<<"\tKEY_PRESSURE/CTRL_CHANGE" << endl;
+                {MidiEvent a(eventDeltaTime, evtType, para1, para2);
+                cout<<"\tKEY_PRESSURE/CTRL_CHANGE\t" << a.toString() << endl;}
                 break;
             case PROGRAM_CHANGE:
             case CHANNEL_PRESSURE:
                 istream.read((char*)&para1, 1);
-                cout<<"\tPROGRAM_CHANGE/CHANNEL_PRESSURE" << endl;
+                {MidiEvent a(eventDeltaTime, evtType, para1, 0);
+                cout<<"\tPROGRAM_CHANGE/CHANNEL_PRESSURE\t" << a.toString() << endl;}
                 break;
             case PITCH_WHEEL_CHANGE:
                 istream.read((char*)&para1, 1);
                 istream.read((char*)&para2, 1);
-                cout<<"\tPITCH_WHEEL_CHANGE" << endl;
+                {MidiEvent a(eventDeltaTime, evtType, para1, para2);
+                cout<<"\tPITCH_WHEEL_CHANGE\t" << a.toString() << endl;}
                 break;
             case 0xF0: // Meta and SysEx. 0x0F = 1111
                 if ((evtType & 0x0F) == 0x0F) { //Meta Event
@@ -148,10 +153,11 @@ retry:
                         istream.seekg(+1, ios::cur);
                         ALREADY_END_OF_TRACK = true;
                         break;
-                    case SET_TEMPO:
+                    case SET_TEMPO: // please notice that, to calc tempo, we should do para2 & 0x00ffffff
                         istream.read((char*)&tmp4ByteBuffer, 4);
                         para1 = byte4_to_uint32(tmp4ByteBuffer);
-                        cout<<"\tTEMPO" << endl;
+                        {MidiEvent a(eventDeltaTime, evtType, metaType, para1);
+                        cout<<"\tTEMPO\t" << a.toString() << endl;}
                         break;
                     case SMTPE_OFFSET:
                         istream.seekg(+6, ios::cur);
@@ -160,13 +166,15 @@ retry:
                         istream.seekg(+1, ios::cur);
                         istream.read((char*)&tmp4ByteBuffer, 4);
                         para1 = byte4_to_uint32(tmp4ByteBuffer);
-                        cout<<"\tTIME_SIGNATURE" << endl;
+                        {MidiEvent a(eventDeltaTime, evtType, metaType, para1);
+                        cout<<"\tTIME_SIGNATURE\t" << a.toString() << endl;}
                         break;
                     case KEY_SIGNATURE:
                         istream.seekg(+1, ios::cur);
                         istream.read((char*)&tmp4ByteBuffer, 4);
                         para1 = byte2_to_uint16(tmp4ByteBuffer);
-                        cout<<"\tKEY_SIGNATURE" << endl;
+                        {MidiEvent a(eventDeltaTime, evtType, metaType, para1);
+                        cout<<"\tKEY_SIGNATURE\t" << para1 << a.toString() << endl;}
                         break;
                     case TEXT_EVENT:
                     case COPYRIGHT:
@@ -176,11 +184,14 @@ retry:
                     case MARKER:
                     case CUE_POINT:
                     case Sequencer_Specific_Meta_event:
+                    case 0x40:
+                        cout << "??";
                     default: //Text-like Event
                         uint32_t len = readVariableLengthQuantity(istream);
                         std::string data(len + 1, ' ');
                         istream.read(&data[0], len); 
-                        cout<<"\tTEXT: " << data << endl;
+                        {MidiEvent a(eventDeltaTime, evtType, metaType, len, data);
+                        cout<<"\tTEXT(" << metaType << "): " << data << "\t//"<< a.toString() << endl;}
                         break;
                     }
                 } else if((evtType&0x0F)==0x00||(evtType&0x0F)==0x07) { //SysEx
