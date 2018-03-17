@@ -1,5 +1,6 @@
 #include "MidiEvent.hpp"
 #include "MidiUtils.hpp"
+#include <string>
 #include <cstring>
 
 using namespace std;
@@ -86,7 +87,7 @@ namespace MidiUtils {
             case SET_TEMPO: return "SET_TEMPO:" + std::to_string(getTempoMs());
             case SMTPE_OFFSET: return "SMTPE_OFFSET";
             case TIME_SIGNATURE: return "TIME_SIGNATURE";
-            case KEY_SIGNATURE: return "KEY_SIGNATURE" + PrettyKeySignature(para2);
+			case KEY_SIGNATURE: return "KEY_SIGNATURE:'" + PrettyKeySignature(para2) + "'";
             case TEXT_EVENT: return "TEXT_EVENT";
             case COPYRIGHT: return "COPYRIGHT";
             case TRACK_NAME: return "TRACK_NAME:'" + extra + "'";
