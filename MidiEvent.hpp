@@ -36,9 +36,6 @@ namespace MidiUtils {
         uint32_t para1, para2; // aka. data byte(s). para1 can be metatype
         byte rawType; // aka. status byte
         std::string extra;
-
-        uint8_t getFirstByteFromPara1();
-        uint8_t getFirstByteFromPara2();
     };
 
 }

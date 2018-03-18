@@ -86,7 +86,8 @@ namespace MidiUtils {
         //Event Process
         uint32_t tmpCurTime = 0;
         uint32_t eventDeltaTime;
-        uint32_t para1, para2;
+        uint32_t paraUint32;
+		char paraByte1, paraByte2;
         byte evtType, lastType;
         bool ALREADY_END_OF_TRACK = false;
 
@@ -103,39 +104,39 @@ namespace MidiUtils {
 retry:
             switch(evtType & 0xF0) { //0xF0 = 11110000
             case NOTE_OFF:
-                istream.read((char*)&para1, 1);
-                istream.read((char*)&para2, 1);
+				istream.get(paraByte1);
+				istream.get(paraByte2);
                 //cout<<"\tNOTE_OFF" << endl;
                 break;
             case NOTE_ON:
-                istream.read((char*)&para1, 1);
-                istream.read((char*)&para2, 1);
-                if(para2) {
+				istream.get(paraByte1);
+                istream.get(paraByte2);
+                if(paraByte2) {
                     this->noteCnt++;
                     //cout<<"\tNOTE_ON" << endl;
                 } else {
                     // a NOTE_ON with zero velocity will be set as a NOTE_OFF
-                    MidiEvent a(eventDeltaTime, evtType, para1, para2);
+                    MidiEvent a(eventDeltaTime, evtType, paraByte1, paraByte2);
                     cout<<"\tNOTE_OFF(from NON)\t" << a.toString() << endl;
                 }
                 break;
             case KEY_PRESSURE:
             case CONTROL_CHANGE:
-                istream.read((char*)&para1, 1);
-                istream.read((char*)&para2, 1);
-                {MidiEvent a(eventDeltaTime, evtType, para1, para2);
+				istream.get(paraByte1);
+                istream.get(paraByte2);
+                {MidiEvent a(eventDeltaTime, evtType, paraByte1, paraByte2);
                 cout<<"\tKEY_PRESSURE/CTRL_CHANGE\t" << a.toString() << endl;}
                 break;
             case PROGRAM_CHANGE:
             case CHANNEL_PRESSURE:
-                istream.read((char*)&para1, 1);
-                {MidiEvent a(eventDeltaTime, evtType, para1, 0);
+                istream.get(paraByte1);
+                {MidiEvent a(eventDeltaTime, evtType, paraByte1, 0);
                 cout<<"\tPROGRAM_CHANGE/CHANNEL_PRESSURE\t" << a.toString() << endl;}
                 break;
             case PITCH_WHEEL_CHANGE:
-                istream.read((char*)&para1, 1);
-                istream.read((char*)&para2, 1);
-                {MidiEvent a(eventDeltaTime, evtType, para1, para2);
+				istream.get(paraByte1);
+				istream.get(paraByte2);
+                {MidiEvent a(eventDeltaTime, evtType, paraByte1, paraByte2);
                 cout<<"\tPITCH_WHEEL_CHANGE\t" << a.toString() << endl;}
                 break;
             case 0xF0: // Meta and SysEx. 0x0F = 1111
@@ -158,8 +159,8 @@ retry:
                         break;
                     case SET_TEMPO: // please notice that, to calc tempo, we should do para2 & 0x00ffffff
                         istream.read((char*)&tmp4ByteBuffer, 4);
-                        para1 = byte4_to_uint32(tmp4ByteBuffer);
-                        {MidiEvent a(eventDeltaTime, evtType, metaType, para1);
+						paraUint32 = byte4_to_uint32(tmp4ByteBuffer);
+                        {MidiEvent a(eventDeltaTime, evtType, metaType, paraUint32);
                         cout<<"\tTEMPO\t" << a.toString() << endl;}
                         break;
                     case SMTPE_OFFSET:
@@ -168,16 +169,16 @@ retry:
                     case TIME_SIGNATURE:
                         istream.seekg(+1, ios::cur);
                         istream.read((char*)&tmp4ByteBuffer, 4);
-                        para1 = byte4_to_uint32(tmp4ByteBuffer);
-                        {MidiEvent a(eventDeltaTime, evtType, metaType, para1);
+						paraUint32 = byte4_to_uint32(tmp4ByteBuffer);
+                        {MidiEvent a(eventDeltaTime, evtType, metaType, paraUint32);
                         cout<<"\tTIME_SIGNATURE\t" << a.toString() << endl;}
                         break;
                     case KEY_SIGNATURE:
                         istream.seekg(+1, ios::cur);
-                        istream.read((char*)&tmp4ByteBuffer, 4);
-                        para1 = byte2_to_uint16(tmp4ByteBuffer);
-                        {MidiEvent a(eventDeltaTime, evtType, metaType, para1);
-                        cout<<"\tKEY_SIGNATURE\t" << para1 << a.toString() << endl;}
+                        istream.read((char*)&tmp4ByteBuffer, 2);
+						paraUint32 = byte2_to_uint16(tmp4ByteBuffer);
+                        {MidiEvent a(eventDeltaTime, evtType, metaType, paraUint32);
+                        cout<<"\tKEY_SIGNATURE\t" << paraUint32 << a.toString() << endl;}
                         break;
                     case TEXT_EVENT:
                     case COPYRIGHT:
