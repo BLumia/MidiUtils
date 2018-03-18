@@ -145,7 +145,9 @@ retry:
                     istream.get(metaType);
                     switch (metaType) {
                     case SEQUENCE_NUM:
-                        istream.seekg(+3, ios::cur);
+                        istream.read((char*)&tmp4ByteBuffer[0], 1);
+                        cout << "\tSEQUENCE_NUM" << endl;
+                        if (tmp4ByteBuffer[0] == 0x02) istream.seekg(+2, ios::cur);
                         break;
                     case CHANNEL_PREFIX:
                         istream.seekg(+2, ios::cur);
@@ -185,8 +187,6 @@ retry:
                     case MARKER:
                     case CUE_POINT:
                     case Sequencer_Specific_Meta_event:
-                    case 0x40:
-                        cout << "??";
                     default: //Text-like Event
                         uint32_t len = readVariableLengthQuantity(istream);
                         std::string data(len + 1, ' ');

@@ -20,16 +20,25 @@ namespace MidiUtils {
         enum EventType getType();
         std::string toString();
 
-        std::string getKeySignature(); 
+        int32_t getChannel();
+        int32_t getKeyNumber();
+        int32_t getVelocity();
+        int32_t getKeyPressure();
+        int32_t getControllerNumber();
+        int32_t getControllerValue();
+        int32_t getChannelPressure();
         int16_t getKeySignatureRaw();
         double getTempoMs();
         int32_t getTempoRaw();
 
     private:
         uint32_t tick;
-        uint32_t para1, para2; // para1 can be metatype
-        byte rawType;
+        uint32_t para1, para2; // aka. data byte(s). para1 can be metatype
+        byte rawType; // aka. status byte
         std::string extra;
+
+        uint8_t getFirstByteFromPara1();
+        uint8_t getFirstByteFromPara2();
     };
 
 }

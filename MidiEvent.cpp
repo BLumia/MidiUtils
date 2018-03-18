@@ -78,7 +78,7 @@ namespace MidiUtils {
                 }
             case KEY_PRESSURE: return "KEY_PRESSURE";
             case CONTROL_CHANGE: return "CONTROL_CHANGE";
-            case PROGRAM_CHANGE: return "PROGRAM_CHANGE";
+            case PROGRAM_CHANGE: return "PROGRAM_CHANGE:Channel=" + std::to_string(getChannel()) + ",ProgramNo:"+std::to_string(para1 >> 24)+".";
             case CHANNEL_PRESSURE: return "CHANNEL_PRESSURE";
             case PITCH_WHEEL_CHANGE: return "PITCH_WHEEL_CHANGE";
             case SEQUENCE_NUM: return "SEQUENCE_NUM";
@@ -100,6 +100,34 @@ namespace MidiUtils {
         }
     }
     
+    int32_t MidiEvent::getChannel() {
+        return static_cast<int32_t>(rawType & 0x0F);
+    }
+
+    int32_t MidiEvent::getKeyNumber() {
+        return getFirstByteFromPara1();
+    }
+
+    int32_t MidiEvent::getVelocity() {
+        return getFirstByteFromPara2();
+    }
+    
+    int32_t MidiEvent::getKeyPressure() {
+        return getFirstByteFromPara2();
+    }
+
+    int32_t MidiEvent::getControllerNumber() {
+        return getFirstByteFromPara1();
+    }
+    
+    int32_t MidiEvent::getControllerValue() {
+        return getFirstByteFromPara2();
+    }
+
+    int32_t MidiEvent::getChannelPressure() {
+        return getFirstByteFromPara1();
+    }
+
     int16_t MidiEvent::getKeySignatureRaw() {
         return static_cast<int16_t>(para2);
     }
@@ -113,5 +141,13 @@ namespace MidiUtils {
     int32_t MidiEvent::getTempoRaw() {
         if (getType() != SET_TEMPO) return -1; 
         return para2;
+    }
+
+    uint8_t MidiEvent::getFirstByteFromPara1() {
+        return static_cast<uint8_t>(para1 >> 24);
+    }
+
+    uint8_t MidiEvent::getFirstByteFromPara2() {
+        return static_cast<uint8_t>(para1 >> 24);
     }
 }
