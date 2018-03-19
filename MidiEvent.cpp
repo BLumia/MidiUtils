@@ -39,7 +39,7 @@ namespace MidiUtils {
         throw "Not f**king implemented";
     }
 
-    enum EventType MidiEvent::getType() {
+    enum EventType MidiEvent::getType() const {
         switch(rawType & 0xF0) {
             case NOTE_OFF: return NOTE_OFF;
             case NOTE_ON:
@@ -67,20 +67,15 @@ namespace MidiUtils {
         }
     }
 
-    std::string MidiEvent::toString() {
+    std::string MidiEvent::toString() const {
         switch(getType()) {
-            case NOTE_OFF: return "NOTE_OFF";
-            case NOTE_ON:
-                if(para2) return "NOTE_ON";
-                else {
-                    // a NOTE_ON with zero velocity will be set as a NOTE_OFF?
-                    return "NOTE_OFF(From NOTE_ON)";
-                }
+            case NOTE_OFF: return "NOTE_OFF:Key=" + std::to_string(getKeyNumber()) + ",Velocity=" + std::to_string(getVelocity()) + ".";
+			case NOTE_ON: return "NOTE_ON:Key=" + std::to_string(getKeyNumber()) + ",Velocity=" + std::to_string(getVelocity()) + ".";
             case KEY_PRESSURE: return "KEY_PRESSURE";
-            case CONTROL_CHANGE: return "CONTROL_CHANGE";
+			case CONTROL_CHANGE: return "CONTROL_CHANGE:Type=" + std::to_string(getControllerNumber()) + ",Value=" + std::to_string(getControllerValue()) + ".";
             case PROGRAM_CHANGE: return "PROGRAM_CHANGE:Channel=" + std::to_string(getChannel()) + ",ProgramNo:"+std::to_string(para1)+".";
             case CHANNEL_PRESSURE: return "CHANNEL_PRESSURE";
-            case PITCH_WHEEL_CHANGE: return "PITCH_WHEEL_CHANGE";
+			case PITCH_WHEEL_CHANGE: return "PITCH_WHEEL_CHANGE:Value=" + std::to_string(getPitchWhellValue())+".";
             case SEQUENCE_NUM: return "SEQUENCE_NUM";
             case CHANNEL_PREFIX: return "CHANNEL_PREFIX";
             case END_OF_TRACK: return "END_OF_TRACK";
@@ -100,45 +95,48 @@ namespace MidiUtils {
         }
     }
     
-    int32_t MidiEvent::getChannel() {
+    int32_t MidiEvent::getChannel() const {
         return static_cast<int32_t>(rawType & 0x0F);
     }
 
-    int32_t MidiEvent::getKeyNumber() {
+    int32_t MidiEvent::getKeyNumber() const {
         return para1;
     }
 
-    int32_t MidiEvent::getVelocity() {
+    int32_t MidiEvent::getVelocity() const {
         return para2;
+    }
+
+	int32_t MidiEvent::getPitchWhellValue() const {
+		return (para1 | (para2 << 7)) & 0x3FFF;
+	}
+    
+    int32_t MidiEvent::getKeyPressure() const {
+        return para2;
+    }
+
+    int32_t MidiEvent::getControllerNumber() const {
+        return para1;
     }
     
-    int32_t MidiEvent::getKeyPressure() {
+    int32_t MidiEvent::getControllerValue() const {
         return para2;
     }
 
-    int32_t MidiEvent::getControllerNumber() {
-        return para1;
-    }
-    
-    int32_t MidiEvent::getControllerValue() {
-        return para2;
-    }
-
-    int32_t MidiEvent::getChannelPressure() {
+    int32_t MidiEvent::getChannelPressure() const {
         return para1;
     }
 
-    int16_t MidiEvent::getKeySignatureRaw() {
+    int16_t MidiEvent::getKeySignatureRaw() const {
         return static_cast<int16_t>(para2);
     }
 
-    double MidiEvent::getTempoMs() {
+    double MidiEvent::getTempoMs() const {
         if (getType() != SET_TEMPO) return -1.0; 
-        int32_t t = para2 & 0x00FFFFFF;
-        return 60.0 / (t / 1e6);
+        return 60.0 / (para2 / 1e6);
     }
 
-    int32_t MidiEvent::getTempoRaw() {
+    int32_t MidiEvent::getTempoRaw() const {
         if (getType() != SET_TEMPO) return -1; 
         return para2;
     }

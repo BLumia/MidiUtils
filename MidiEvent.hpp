@@ -17,19 +17,20 @@ namespace MidiUtils {
         MidiEvent(uint32_t tickTime, byte rawType, byte rawMetaType, uint32_t para, std::string extra);
         MidiEvent(uint32_t tickTime, enum EventType type, uint32_t para1, uint32_t para2);
         MidiEvent(uint32_t tickTime, enum EventType type, uint32_t para, std::string extra);
-        enum EventType getType();
-        std::string toString();
+        enum EventType getType() const;
+        std::string toString() const;
 
-        int32_t getChannel();
-        int32_t getKeyNumber();
-        int32_t getVelocity();
-        int32_t getKeyPressure();
-        int32_t getControllerNumber();
-        int32_t getControllerValue();
-        int32_t getChannelPressure();
-        int16_t getKeySignatureRaw();
-        double getTempoMs();
-        int32_t getTempoRaw();
+        int32_t getChannel() const;
+        int32_t getKeyNumber() const;
+        int32_t getVelocity() const;
+        int32_t getPitchWhellValue() const;
+        int32_t getKeyPressure() const;
+        int32_t getControllerNumber() const;
+        int32_t getControllerValue() const;
+        int32_t getChannelPressure() const;
+        int16_t getKeySignatureRaw() const;
+        double getTempoMs() const;
+        int32_t getTempoRaw() const;
 
     private:
         uint32_t tick;

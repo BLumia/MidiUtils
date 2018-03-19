@@ -18,7 +18,7 @@ namespace MidiUtils {
         ~MidiFile();
         int read(istream& istream);
         int write(ostream& ostream);
-        void appendTrack(MidiTrack track); // TODO: (const MidiTrack& track) to avoid copy
+        void appendTrack(const MidiTrack& track);
         MidiTrack& operator[](size_t index);
     
     private:

@@ -65,7 +65,7 @@ namespace MidiUtils {
         return 0;
     }
 
-    void MidiFile::appendTrack(MidiTrack track) {
+    void MidiFile::appendTrack(const MidiTrack& track) {
         trackList.push_back(track);
     }
 
@@ -147,7 +147,7 @@ retry:
                         ALREADY_END_OF_TRACK = true;
                         curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, 0));
                         break;
-                    case SET_TEMPO: // please notice that, to calc tempo, we should do para2 & 0x00ffffff
+                    case SET_TEMPO:
                         istream.read((char*)&tmp4ByteBuffer[1], 3);
                         tmp4ByteBuffer[0] &= 0x00;
 						paraUint32 = byte4_to_uint32(tmp4ByteBuffer);

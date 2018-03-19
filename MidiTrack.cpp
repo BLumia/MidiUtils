@@ -2,6 +2,7 @@
 #include "MidiUtils.hpp"
 
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -11,7 +12,7 @@ namespace MidiUtils {
 
     }
 
-    void MidiTrack::appendEvent(MidiEvent event) {
+    void MidiTrack::appendEvent(const MidiEvent& event) {
         enum EventType type = event.getType();
         if (type != NOTE_ON && type != NOTE_OFF) cout << "\t" << event.toString() << endl;
         eventList.push_back(event);

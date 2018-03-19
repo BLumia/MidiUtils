@@ -13,7 +13,7 @@ namespace MidiUtils {
         
     public:
         MidiTrack();
-        void appendEvent(MidiEvent event); // TODO: (const MidiEvent& event) to avoid copy
+        void appendEvent(const MidiEvent& event);
         MidiEvent& operator[](size_t index);
 
     private:
