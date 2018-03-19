@@ -56,7 +56,7 @@ namespace MidiUtils {
             readedTrackCnt++;
         }
 
-        cout << "Note Count: " << this->noteCnt << endl;
+        cout << "Process End" << endl;
 
         return 0;
     }
@@ -65,7 +65,17 @@ namespace MidiUtils {
         return 0;
     }
 
-    void MidiFile::MTrkReader(istream& istream) {
+    void MidiFile::appendTrack(MidiTrack track) {
+        trackList.push_back(track);
+    }
+
+    MidiTrack& MidiFile::operator[](size_t index) {
+        return trackList[index];
+    }
+
+    MidiTrack MidiFile::MTrkReader(istream& istream) {
+
+        MidiTrack curTrack;
 
         struct TrackHeader tmpTrackHeader;
         std::string rawMTrkHeader(8, ' ');
@@ -104,81 +114,57 @@ namespace MidiUtils {
 retry:
             switch(evtType & 0xF0) { //0xF0 = 11110000
             case NOTE_OFF:
-				istream.get(paraByte1);
-				istream.get(paraByte2);
-                //cout<<"\tNOTE_OFF" << endl;
-                break;
             case NOTE_ON:
-				istream.get(paraByte1);
-                istream.get(paraByte2);
-                if(paraByte2) {
-                    this->noteCnt++;
-                    //cout<<"\tNOTE_ON" << endl;
-                } else {
-                    // a NOTE_ON with zero velocity will be set as a NOTE_OFF
-                    MidiEvent a(eventDeltaTime, evtType, paraByte1, paraByte2);
-                    cout<<"\tNOTE_OFF(from NON)\t" << a.toString() << endl;
-                }
-                break;
             case KEY_PRESSURE:
             case CONTROL_CHANGE:
+            case PITCH_WHEEL_CHANGE:
 				istream.get(paraByte1);
                 istream.get(paraByte2);
-                {MidiEvent a(eventDeltaTime, evtType, paraByte1, paraByte2);
-                cout<<"\tKEY_PRESSURE/CTRL_CHANGE\t" << a.toString() << endl;}
+                curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, paraByte1, paraByte2));
                 break;
             case PROGRAM_CHANGE:
             case CHANNEL_PRESSURE:
                 istream.get(paraByte1);
-                {MidiEvent a(eventDeltaTime, evtType, paraByte1, 0);
-                cout<<"\tPROGRAM_CHANGE/CHANNEL_PRESSURE\t" << a.toString() << endl;}
-                break;
-            case PITCH_WHEEL_CHANGE:
-				istream.get(paraByte1);
-				istream.get(paraByte2);
-                {MidiEvent a(eventDeltaTime, evtType, paraByte1, paraByte2);
-                cout<<"\tPITCH_WHEEL_CHANGE\t" << a.toString() << endl;}
+                curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, paraByte1, 0));
                 break;
             case 0xF0: // Meta and SysEx. 0x0F = 1111
                 if ((evtType & 0x0F) == 0x0F) { //Meta Event
                     char metaType;
                     byte tmp4ByteBuffer[4];
+                    uint32_t len;
                     istream.get(metaType);
+                    len = readVariableLengthQuantity(istream);
                     switch (metaType) {
                     case SEQUENCE_NUM:
-                        istream.read((char*)&tmp4ByteBuffer[0], 1);
                         cout << "\tSEQUENCE_NUM" << endl;
-                        if (tmp4ByteBuffer[0] == 0x02) istream.seekg(+2, ios::cur);
+                        istream.ignore(len);
                         break;
                     case CHANNEL_PREFIX:
-                        istream.seekg(+2, ios::cur);
+                        istream.ignore(len);
                         break;
                     case END_OF_TRACK:
-                        istream.seekg(+1, ios::cur);
+                        istream.ignore(len);
                         ALREADY_END_OF_TRACK = true;
+                        curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, 0));
                         break;
                     case SET_TEMPO: // please notice that, to calc tempo, we should do para2 & 0x00ffffff
-                        istream.read((char*)&tmp4ByteBuffer, 4);
+                        istream.read((char*)&tmp4ByteBuffer[1], 3);
+                        tmp4ByteBuffer[0] &= 0x00;
 						paraUint32 = byte4_to_uint32(tmp4ByteBuffer);
-                        {MidiEvent a(eventDeltaTime, evtType, metaType, paraUint32);
-                        cout<<"\tTEMPO\t" << a.toString() << endl;}
+                        curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, paraUint32));
                         break;
                     case SMTPE_OFFSET:
-                        istream.seekg(+6, ios::cur);
+                        istream.ignore(len);
                         break;
                     case TIME_SIGNATURE:
-                        istream.seekg(+1, ios::cur);
                         istream.read((char*)&tmp4ByteBuffer, 4);
 						paraUint32 = byte4_to_uint32(tmp4ByteBuffer);
-                        {MidiEvent a(eventDeltaTime, evtType, metaType, paraUint32);
-                        cout<<"\tTIME_SIGNATURE\t" << a.toString() << endl;}
+                        curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, paraUint32));
                         break;
                     case KEY_SIGNATURE:
-                        istream.seekg(+1, ios::cur);
                         istream.read((char*)&tmp4ByteBuffer, 2);
 						paraUint32 = byte2_to_uint16(tmp4ByteBuffer);
-                        {MidiEvent a(eventDeltaTime, evtType, metaType, paraUint32);
-                        cout<<"\tKEY_SIGNATURE\t" << paraUint32 << a.toString() << endl;}
+                        curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, paraUint32));
                         break;
                     case TEXT_EVENT:
                     case COPYRIGHT:
@@ -189,11 +175,9 @@ retry:
                     case CUE_POINT:
                     case Sequencer_Specific_Meta_event:
                     default: //Text-like Event
-                        uint32_t len = readVariableLengthQuantity(istream);
-                        std::string data(len + 1, ' ');
+                        std::string data(len, ' ');
                         istream.read(&data[0], len); 
-                        {MidiEvent a(eventDeltaTime, evtType, metaType, len, data);
-                        cout<<"\tTEXT(" << metaType << "): " << data << "\t//"<< a.toString() << endl;}
+                        curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, len, data));
                         break;
                     }
                 } else if((evtType&0x0F)==0x00||(evtType&0x0F)==0x07) { //SysEx
@@ -214,7 +198,7 @@ retry:
 
         //istream.seekg(payloadEnd, ios::beg);
 
-        return;
+        return curTrack;
     }
 
 }

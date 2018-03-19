@@ -4,6 +4,7 @@
 #include <istream>
 #include <fstream>
 #include "MidiUtils.hpp"
+#include "MidiTrack.hpp"
 
 using namespace std;
 
@@ -17,11 +18,13 @@ namespace MidiUtils {
         ~MidiFile();
         int read(istream& istream);
         int write(ostream& ostream);
+        void appendTrack(MidiTrack track); // TODO: (const MidiTrack& track) to avoid copy
+        MidiTrack& operator[](size_t index);
     
     private:
         struct FileHeader header;
-        void MTrkReader(istream& istream);
-        uint32_t noteCnt = 0; // test for now
+        MidiTrack MTrkReader(istream& istream);
+        std::vector<MidiTrack> trackList;
     };
 
 }
