@@ -1,8 +1,7 @@
-#include "MidiTrack.hpp"
-#include "MidiUtils.hpp"
-
 #include <iostream>
 #include <string>
+#include "midiutils/MidiTrack.hpp"
+#include "midiutils/MidiUtils.hpp"
 
 using namespace std;
 

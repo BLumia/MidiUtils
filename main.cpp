@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "MidiFile.hpp"
+#include <midiutils/MidiFile.hpp>
 
 using namespace std;
 using namespace MidiUtils;

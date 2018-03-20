@@ -2,8 +2,8 @@
 #include <fstream>
 #include <string>
 #include <cstring>
-#include "MidiFile.hpp"
-#include "MidiEvent.hpp"
+#include "midiutils/MidiFile.hpp"
+#include "midiutils/MidiEvent.hpp"
 
 using namespace std;
 

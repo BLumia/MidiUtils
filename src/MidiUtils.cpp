@@ -1,7 +1,7 @@
 #include <istream>
 #include <string>
 #include <fstream>
-#include "MidiUtils.hpp"
+#include "midiutils/MidiUtils.hpp"
 
 namespace MidiUtils {
 

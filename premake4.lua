@@ -1,15 +1,33 @@
 #!lua
 
 -- A solution contains projects, and defines the available configurations
-solution "MidiFile"
+solution "MidiUtils"
+    objdir "build/obj"
+    targetdir "build/bin"
     configurations { "Debug", "Release" }
 
-    -- A project defines one build target
-    project "MidiFile"
+    -- The main library
+    project "MidiUtils"
+        kind "StaticLib"
+        language "C++"
+        includedirs { "include" }
+        files { "**.h", "src/**.cpp" }
+        configuration "Debug"
+            defines { "DEBUG" }
+            flags { "Symbols" }
+
+        configuration "Release"
+            defines { "NDEBUG" }
+            flags { "Optimize" }
+
+
+    -- A Test Example
+    project "TestExample"
         kind "ConsoleApp"
         language "C++"
-        files { "**.h", "**.cpp" }
-
+        includedirs { "include" }
+        files { "main.cpp" }
+        links { "MidiUtils" }
         configuration "Debug"
             defines { "DEBUG" }
             flags { "Symbols" }

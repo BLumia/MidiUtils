@@ -1,7 +1,7 @@
-#include "MidiEvent.hpp"
-#include "MidiUtils.hpp"
 #include <string>
 #include <cstring>
+#include "midiutils/MidiEvent.hpp"
+#include "midiutils/MidiUtils.hpp"
 
 using namespace std;
 
