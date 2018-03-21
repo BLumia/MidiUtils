@@ -3,6 +3,7 @@
 
 #include <istream>
 #include <fstream>
+#include <functional>
 #include "MidiUtils.hpp"
 #include "MidiTrack.hpp"
 
@@ -16,10 +17,14 @@ namespace MidiUtils {
         MidiFile();
         MidiFile(const std::string filepath);
         ~MidiFile();
+        void load(const std::string filepath);
         int read(istream& istream);
         int write(ostream& ostream);
         void appendTrack(const MidiTrack& track);
         MidiTrack& operator[](size_t index);
+
+        std::function<void(const MidiEvent&)> on_appendEvent;
+        std::function<void(const MidiTrack&)> on_appendTrack;
     
     private:
         struct FileHeader header;

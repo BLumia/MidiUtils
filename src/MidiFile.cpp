@@ -14,6 +14,14 @@ namespace MidiUtils {
     }
 
     MidiFile::MidiFile(const std::string filepath) {
+        load(filepath);
+    }
+
+    MidiFile::~MidiFile() {
+
+    }
+
+    void MidiFile::load(const std::string filepath) {
         cout << "File Path:" << filepath << endl;
         fstream input;
         input.open(filepath.data(), ios::binary | ios::in);
@@ -24,10 +32,6 @@ namespace MidiUtils {
 
         read(input);
         input.close();
-    }
-
-    MidiFile::~MidiFile() {
-
     }
 
     int MidiFile::read(istream& istream) {
@@ -66,6 +70,7 @@ namespace MidiUtils {
     }
 
     void MidiFile::appendTrack(const MidiTrack& track) {
+        if (on_appendTrack) on_appendTrack(track);
         trackList.push_back(track);
     }
 
@@ -76,6 +81,8 @@ namespace MidiUtils {
     MidiTrack MidiFile::MTrkReader(istream& istream) {
 
         MidiTrack curTrack;
+
+        if (on_appendEvent) curTrack.on_appendEvent = on_appendEvent;
 
         struct TrackHeader tmpTrackHeader;
         std::string rawMTrkHeader(8, ' ');

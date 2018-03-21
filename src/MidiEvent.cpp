@@ -140,4 +140,8 @@ namespace MidiUtils {
         if (getType() != SET_TEMPO) return -1; 
         return para2;
     }
+
+    void MidiEvent::setChannel(uint8_t value) {
+        rawType = ((rawType & 0xF0) | (value & 0x0F));
+    }
 }

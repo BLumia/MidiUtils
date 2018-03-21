@@ -32,6 +32,8 @@ namespace MidiUtils {
         double getTempoMs() const;
         int32_t getTempoRaw() const;
 
+        void setChannel(uint8_t value);
+
     private:
         uint32_t tick;
         uint32_t para1, para2; // aka. data byte(s). para1 can be metatype

@@ -12,8 +12,7 @@ namespace MidiUtils {
     }
 
     void MidiTrack::appendEvent(const MidiEvent& event) {
-        enum EventType type = event.getType();
-        if (type != NOTE_ON && type != NOTE_OFF) cout << "\t" << event.toString() << endl;
+        if (on_appendEvent) on_appendEvent(event);
         eventList.push_back(event);
     }
 

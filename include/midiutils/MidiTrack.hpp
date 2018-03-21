@@ -2,6 +2,7 @@
 #define __MIDITRACK_HPP
 
 #include <vector>
+#include <functional>
 #include "MidiUtils.hpp"
 #include "MidiEvent.hpp"
 
@@ -15,6 +16,8 @@ namespace MidiUtils {
         MidiTrack();
         void appendEvent(const MidiEvent& event);
         MidiEvent& operator[](size_t index);
+
+        std::function<void(const MidiEvent&)> on_appendEvent;
 
     private:
         std::vector<MidiEvent> eventList;
