@@ -4,6 +4,7 @@
 solution "MidiUtils"
     objdir "build/obj"
     targetdir "build/bin"
+    debugdir "build/bin"
     configurations { "Debug", "Release" }
 
     -- The main library

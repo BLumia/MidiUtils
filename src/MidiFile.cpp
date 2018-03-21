@@ -4,6 +4,7 @@
 #include <cstring>
 #include "midiutils/MidiFile.hpp"
 #include "midiutils/MidiEvent.hpp"
+#include "midiutils/MidiHeader.hpp"
 
 using namespace std;
 
@@ -22,7 +23,6 @@ namespace MidiUtils {
     }
 
     void MidiFile::load(const std::string filepath) {
-        cout << "File Path:" << filepath << endl;
         fstream input;
         input.open(filepath.data(), ios::binary | ios::in);
 
@@ -35,26 +35,17 @@ namespace MidiUtils {
     }
 
     int MidiFile::read(istream& istream) {
-
-        std::string rawMThd(14, ' ');
         
         // Read MThd header chunk
 
-        istream.read(&rawMThd[0], 14);
-        if (rawMThd.substr(0, 4) != "MThd") {
-            throw "Not a MIDI file!";
-        }
-
-        memcpy(&this->header, rawMThd.c_str(), 14);
-
-        cout << "Format: " << byte2_to_uint16(this->header.midiFormat) << endl;
-        cout << "Track Count: " << byte2_to_uint16(this->header.midiTrackCnt) << endl;
-        cout << "Delta Time: " << byte2_to_uint16(this->header.midiDeltaTime) << endl;
+        MidiHeader tmpMThd;
+        tmpMThd.read(istream);
+        updateHeader(tmpMThd);
 
         // Read MTrk chunks
 
         int readedTrackCnt = 0;
-        while (readedTrackCnt < byte2_to_uint16(header.midiTrackCnt)) {
+        while (readedTrackCnt < header.getTrackCount()) {
             appendTrack(MTrkReader(istream));
 
             readedTrackCnt++;
@@ -69,9 +60,22 @@ namespace MidiUtils {
         return 0;
     }
 
-    void MidiFile::appendTrack(const MidiTrack& track) {
+    void MidiFile::appendTrack(MidiTrack& track) {
         if (on_appendTrack) on_appendTrack(track);
         trackList.push_back(track);
+    }
+
+    void MidiFile::updateHeader(MidiHeader& oneHeader) {
+        if (on_updateHeader) on_updateHeader(oneHeader);
+        header = oneHeader;
+    }
+
+    MidiHeader MidiFile::generateHeader() {
+        throw "Not f**king implemented";
+    }
+
+    MidiHeader MidiFile::getHeader() const {
+        return header;
     }
 
     MidiTrack& MidiFile::operator[](size_t index) {
