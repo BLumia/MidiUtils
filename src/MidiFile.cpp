@@ -55,7 +55,7 @@ namespace MidiUtils {
 
         int readedTrackCnt = 0;
         while (readedTrackCnt < byte2_to_uint16(header.midiTrackCnt)) {
-            MTrkReader(istream);
+            appendTrack(MTrkReader(istream));
 
             readedTrackCnt++;
         }
