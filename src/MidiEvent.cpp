@@ -144,4 +144,8 @@ namespace MidiUtils {
     void MidiEvent::setChannel(uint8_t value) {
         rawType = ((rawType & 0xF0) | (value & 0x0F));
     }
+
+    void MidiEvent::setKeyNumber(int32_t value) {
+        para1 = value;
+    }
 }

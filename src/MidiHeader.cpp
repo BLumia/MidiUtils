@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include "midiutils/MidiHeader.hpp"
 #include "midiutils/MidiUtils.hpp"
 

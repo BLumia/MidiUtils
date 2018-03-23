@@ -40,7 +40,7 @@ namespace MidiUtils {
 
         MidiHeader tmpMThd;
         tmpMThd.read(istream);
-        updateHeader(tmpMThd);
+        updateHeader(std::move(tmpMThd));
 
         // Read MTrk chunks
 
@@ -60,12 +60,12 @@ namespace MidiUtils {
         return 0;
     }
 
-    void MidiFile::appendTrack(MidiTrack& track) {
+    void MidiFile::appendTrack(MidiTrack&& track) {
         if (on_appendTrack) on_appendTrack(track);
         trackList.push_back(track);
     }
 
-    void MidiFile::updateHeader(MidiHeader& oneHeader) {
+    void MidiFile::updateHeader(MidiHeader&& oneHeader) {
         if (on_updateHeader) on_updateHeader(oneHeader);
         header = oneHeader;
     }

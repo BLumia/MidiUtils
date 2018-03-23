@@ -21,8 +21,8 @@ namespace MidiUtils {
         void load(const std::string filepath);
         int read(istream& istream);
         int write(ostream& ostream);
-        void appendTrack(MidiTrack& track);
-        void updateHeader(MidiHeader& oneHeader);
+        void appendTrack(MidiTrack&& track);
+        void updateHeader(MidiHeader&& oneHeader);
         MidiHeader generateHeader();
         MidiHeader getHeader() const;
         MidiTrack& operator[](size_t index);

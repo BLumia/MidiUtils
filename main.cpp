@@ -8,7 +8,7 @@ using namespace MidiUtils;
 
 int main() {
     
-	MidiFile a;
+    MidiFile a;
 
     a.on_updateHeader = [](MidiHeader& h) {
         cout << "File Format: " << h.getFormat() << endl;
@@ -18,20 +18,20 @@ int main() {
 
     a.on_appendEvent = [](MidiEvent& e) {
         enum EventType type = e.getType();
-        if (type != NOTE_ON && type != NOTE_OFF) cout << "\t:" << e.toString() << endl;
+        if (type != NOTE_ON && type != NOTE_OFF) cout << "\t" << e.toString() << endl;
     };
 
     a.on_appendTrack = [](MidiTrack& t) {
         cout << "-- One Track Process Done --" << endl;
     };
 
-	try {
-		a.load("test.mid");
-	} catch (const char * e) {
-		cout << e << endl;
-	}
+    try {
+        a.load("test.mid");
+    } catch (const char * e) {
+        cout << e << endl;
+    }
 
     cout << "Nya!" << endl;
 
-	return 0;
+    return 0;
 } 

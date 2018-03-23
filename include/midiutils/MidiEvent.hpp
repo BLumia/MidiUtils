@@ -33,6 +33,7 @@ namespace MidiUtils {
         int32_t getTempoRaw() const;
 
         void setChannel(uint8_t value);
+        void setKeyNumber(int32_t value);
 
     private:
         uint32_t tick;

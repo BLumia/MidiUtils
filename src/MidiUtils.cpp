@@ -27,15 +27,15 @@ namespace MidiUtils {
         return ret;
     }
 
-    std::string PrettyKeySignature(int16_t keysign) {
+    std::string PrettyKeySignature(const int16_t keysign) {
 		static const std::string fsStrTable[2][13] = {
 			{"Gb", "Db", "Ab", "Eb", "Bb", "F", "C", "G", "D", "A",  "E",  "B",  "F#"},
 			{"eb", "bb", "f",  "c",  "g",  "d", "a", "e", "b", "f#", "c#", "g#", "d#"}
 		};
 		static const std::string mmStrTable[2] = {"Major", "Minor"};
         int8_t flatsharp = keysign >> 8;
-        int8_t majerminor = keysign & 0x00FF;
-        return fsStrTable[majerminor][flatsharp + 6] + " " + mmStrTable[majerminor];
+        int8_t majorminor = keysign & 0x00FF;
+        return fsStrTable[majorminor][flatsharp + 6] + " " + mmStrTable[majorminor];
     }
 
 }

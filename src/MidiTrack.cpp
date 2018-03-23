@@ -11,7 +11,7 @@ namespace MidiUtils {
 
     }
 
-    void MidiTrack::appendEvent(MidiEvent& event) {
+    void MidiTrack::appendEvent(MidiEvent&& event) {
         if (on_appendEvent) on_appendEvent(event);
         eventList.push_back(event);
     }

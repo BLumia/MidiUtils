@@ -14,7 +14,7 @@ namespace MidiUtils {
         
     public:
         MidiTrack();
-        void appendEvent(MidiEvent& event);
+        void appendEvent(MidiEvent&& event);
         MidiEvent& operator[](size_t index);
 
         std::function<void(MidiEvent&)> on_appendEvent;
