@@ -1,5 +1,7 @@
 #include <string>
 #include <cstring>
+#include <iostream>
+#include <fstream>
 #include "midiutils/MidiEvent.hpp"
 #include "midiutils/MidiUtils.hpp"
 
@@ -13,6 +15,13 @@ namespace MidiUtils {
         extra = "";
     }
 
+    MidiEvent::MidiEvent(istream& istream) {
+        rawType = 0;
+        tick = para1 = para2 = 0;
+        extra = "";
+        read(istream);
+    }
+/*
     MidiEvent::MidiEvent(uint32_t tickTime, byte rawType, uint32_t para1, uint32_t para2) {
         this->rawType = rawType;
         this->tick = tickTime;
@@ -38,32 +47,112 @@ namespace MidiUtils {
     MidiEvent::MidiEvent(uint32_t tickTime, enum EventType type, uint32_t para, std::string extra) {
         throw "Not f**king implemented";
     }
+*/
+    int MidiEvent::read(istream& istream) {
+
+        char paraByte1, paraByte2;
+
+        delta = readVariableLengthQuantity(istream);
+        istream.read((char*)&rawType, 1);
+        
+        switch(rawType & 0xF0) { //0xF0 = 11110000
+            case NOTE_OFF:
+            case NOTE_ON:
+            case KEY_PRESSURE:
+            case CONTROL_CHANGE:
+            case PITCH_WHEEL_CHANGE:
+				istream.get(paraByte1);
+                istream.get(paraByte2);
+                para1 = paraByte1;
+                para2 = paraByte2;
+                return 0;
+            case PROGRAM_CHANGE:
+            case CHANNEL_PRESSURE:
+                istream.get(paraByte1);
+                para1 = paraByte1;
+                para2 = 0;
+                return 0;
+            case 0xF0: // Meta and SysEx. 0x0F = 1111
+                if ((rawType & 0x0F) == 0x0F) { //Meta Event
+                    char metaType;
+                    byte tmp4ByteBuffer[4];
+                    uint32_t len;
+                    istream.get(metaType);
+                    len = readVariableLengthQuantity(istream);
+                    switch (metaType) {
+                    case SEQUENCE_NUM:
+                        cout << "\tSEQUENCE_NUM" << endl;
+                        istream.ignore(len);
+                        return 0;
+                    case CHANNEL_PREFIX:
+                        istream.ignore(len);
+                        return 0;
+                    case END_OF_TRACK:
+                        istream.ignore(len);
+                        return 0;
+                    case SET_TEMPO:
+                        istream.read((char*)&tmp4ByteBuffer[1], 3);
+                        tmp4ByteBuffer[0] &= 0x00;
+                        para1 = metaType;
+						para2 = byte4_to_uint32(tmp4ByteBuffer);
+                        return 0;
+                    case SMTPE_OFFSET:
+                        istream.ignore(len);
+                        return 0;
+                    case TIME_SIGNATURE:
+                        istream.read((char*)&tmp4ByteBuffer, 4);
+                        para1 = metaType;
+						para2 = byte4_to_uint32(tmp4ByteBuffer);
+                        return 0;
+                    case KEY_SIGNATURE:
+                        istream.read((char*)&tmp4ByteBuffer, 2);
+                        para1 = metaType;
+						para2 = byte2_to_uint16(tmp4ByteBuffer);
+                        return 0;
+                    case TEXT_EVENT:
+                    case COPYRIGHT:
+                    case TRACK_NAME:
+                    case INSTRUMENT_NAME:
+                    case LYRIC:
+                    case MARKER:
+                    case CUE_POINT:
+                    case Sequencer_Specific_Meta_event:
+                    default: //Text-like Event
+                        std::string data(len, ' ');
+                        istream.read(&data[0], len); 
+                        para1 = metaType;
+                        para2 = len;
+                        extra = data;
+                        return 0;
+                    }
+                } else if((rawType & 0x0F) == 0x00 || (rawType & 0x0F) == 0x07) { //SysEx
+                    uint32_t len = readVariableLengthQuantity(istream);
+                    istream.seekg(len, ios::cur);
+                } else {
+                    cout << "Event INVALID." << endl;
+                }
+                return 0;
+            default:
+                cout << "Event INVALID. at: " << istream.tellg() << endl;
+                return 0;
+            }
+
+        return 0;
+    }
 
     enum EventType MidiEvent::getType() const {
-        switch(rawType & 0xF0) {
-            case NOTE_OFF: return NOTE_OFF;
+        enum EventType theType = getTypeFromByte(rawType);
+        switch(theType) {
             case NOTE_ON:
                 if(para2) return NOTE_ON;
                 else {
                     // a NOTE_ON with zero velocity will be set as a NOTE_OFF?
                     return NOTE_OFF;
                 }
-            case KEY_PRESSURE:
-            case CONTROL_CHANGE:
-            case PROGRAM_CHANGE:
-            case CHANNEL_PRESSURE:
-            case PITCH_WHEEL_CHANGE:
-                return static_cast<enum EventType>(rawType & 0xF0);
-            case 0xF0: 
-                if ((rawType & 0x0F) == 0x0F) {
-                    return static_cast<enum EventType>(para1);
-                } else if ((rawType & 0x0F) == 0x00 || (rawType & 0x0F) == 0x07) {
-                    return SYSEX;
-                } else {
-                    return E_INVALID;
-                }
+            case E_META: 
+                return static_cast<enum EventType>(para1);
             default:
-                return E_INVALID;
+                return theType;
         }
     }
 
@@ -93,6 +182,10 @@ namespace MidiUtils {
             case Sequencer_Specific_Meta_event: return "Sequencer_Specific_Meta_event";
             default: return "E_INVALID";
         }
+    }
+
+    int32_t MidiEvent::getDeltaTime() const {
+        return delta;
     }
     
     int32_t MidiEvent::getChannel() const {

@@ -28,6 +28,7 @@ namespace MidiUtils {
 
     enum EventType {
         E_INVALID = -1,
+        E_META = -2,
         // Meta Types:
         SEQUENCE_NUM = 0x00,
         TEXT_EVENT = 0x01,
@@ -59,6 +60,7 @@ namespace MidiUtils {
     uint32_t byte4_to_uint32(const byte* buffer);
     uint32_t readVariableLengthQuantity(istream& istream);
     std::string PrettyKeySignature(const int16_t keysign);
+    enum EventType getTypeFromByte(const byte rawType);
 
 }
 

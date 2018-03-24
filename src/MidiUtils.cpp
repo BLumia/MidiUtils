@@ -38,4 +38,27 @@ namespace MidiUtils {
         return fsStrTable[majorminor][flatsharp + 6] + " " + mmStrTable[majorminor];
     }
 
+    enum EventType getTypeFromByte(const byte rawType) {
+        switch(rawType & 0xF0) {
+            case NOTE_OFF: 
+            case NOTE_ON:
+            case KEY_PRESSURE:
+            case CONTROL_CHANGE:
+            case PROGRAM_CHANGE:
+            case CHANNEL_PRESSURE:
+            case PITCH_WHEEL_CHANGE:
+                return static_cast<enum EventType>(rawType & 0xF0);
+            case 0xF0: 
+                if ((rawType & 0x0F) == 0x0F) {
+                    return E_META;
+                } else if ((rawType & 0x0F) == 0x00 || (rawType & 0x0F) == 0x07) {
+                    return SYSEX;
+                } else {
+                    return E_INVALID;
+                }
+            default:
+                return E_INVALID;
+        }
+    }
+
 }

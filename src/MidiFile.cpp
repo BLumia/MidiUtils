@@ -106,105 +106,15 @@ namespace MidiUtils {
 
         //Event Process
         uint32_t tmpCurTime = 0;
-        uint32_t eventDeltaTime;
-        uint32_t paraUint32;
-		char paraByte1, paraByte2;
-        byte evtType, lastType;
         bool ALREADY_END_OF_TRACK = false;
 
         while ((istream.tellg() < payloadEnd) && !ALREADY_END_OF_TRACK) {
-            eventDeltaTime = readVariableLengthQuantity(istream);
-            tmpCurTime += eventDeltaTime;
-            istream.read((char*)&evtType, 1);
-            if ((evtType & 0x80) == 0x00) {
-                evtType = lastType;
-                istream.seekg(-1, ios::cur);
-            } else {
-                lastType = evtType;
-            }
-retry:
-            switch(evtType & 0xF0) { //0xF0 = 11110000
-            case NOTE_OFF:
-            case NOTE_ON:
-            case KEY_PRESSURE:
-            case CONTROL_CHANGE:
-            case PITCH_WHEEL_CHANGE:
-				istream.get(paraByte1);
-                istream.get(paraByte2);
-                curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, paraByte1, paraByte2));
-                break;
-            case PROGRAM_CHANGE:
-            case CHANNEL_PRESSURE:
-                istream.get(paraByte1);
-                curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, paraByte1, 0));
-                break;
-            case 0xF0: // Meta and SysEx. 0x0F = 1111
-                if ((evtType & 0x0F) == 0x0F) { //Meta Event
-                    char metaType;
-                    byte tmp4ByteBuffer[4];
-                    uint32_t len;
-                    istream.get(metaType);
-                    len = readVariableLengthQuantity(istream);
-                    switch (metaType) {
-                    case SEQUENCE_NUM:
-                        cout << "\tSEQUENCE_NUM" << endl;
-                        istream.ignore(len);
-                        break;
-                    case CHANNEL_PREFIX:
-                        istream.ignore(len);
-                        break;
-                    case END_OF_TRACK:
-                        istream.ignore(len);
-                        ALREADY_END_OF_TRACK = true;
-                        curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, 0));
-                        break;
-                    case SET_TEMPO:
-                        istream.read((char*)&tmp4ByteBuffer[1], 3);
-                        tmp4ByteBuffer[0] &= 0x00;
-						paraUint32 = byte4_to_uint32(tmp4ByteBuffer);
-                        curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, paraUint32));
-                        break;
-                    case SMTPE_OFFSET:
-                        istream.ignore(len);
-                        break;
-                    case TIME_SIGNATURE:
-                        istream.read((char*)&tmp4ByteBuffer, 4);
-						paraUint32 = byte4_to_uint32(tmp4ByteBuffer);
-                        curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, paraUint32));
-                        break;
-                    case KEY_SIGNATURE:
-                        istream.read((char*)&tmp4ByteBuffer, 2);
-						paraUint32 = byte2_to_uint16(tmp4ByteBuffer);
-                        curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, paraUint32));
-                        break;
-                    case TEXT_EVENT:
-                    case COPYRIGHT:
-                    case TRACK_NAME:
-                    case INSTRUMENT_NAME:
-                    case LYRIC:
-                    case MARKER:
-                    case CUE_POINT:
-                    case Sequencer_Specific_Meta_event:
-                    default: //Text-like Event
-                        std::string data(len, ' ');
-                        istream.read(&data[0], len); 
-                        curTrack.appendEvent(MidiEvent(eventDeltaTime, evtType, metaType, len, data));
-                        break;
-                    }
-                } else if((evtType&0x0F)==0x00||(evtType&0x0F)==0x07) { //SysEx
-                    uint32_t len = readVariableLengthQuantity(istream);
-                    istream.seekg(len, ios::cur);
-                } else {
-                    cout << "Event INVALID." << endl;
-                }
-                break;
-            default:
-                cout << "Event INVALID. Trying to repeat last event. at: " << istream.tellg() << endl;
-                istream.seekg(-1, ios::cur);
-                evtType = lastType;
-                goto retry;
-            }
-            lastType = evtType;
+            MidiEvent e(istream);
+
+            tmpCurTime += e.getDeltaTime();
+            e.setTickTime(tmpCurTime);
+
+            curTrack.appendEvent(std::move(e));
         }
 
         //istream.seekg(payloadEnd, ios::beg);
