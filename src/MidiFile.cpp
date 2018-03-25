@@ -57,6 +57,8 @@ namespace MidiUtils {
     }
 
     int MidiFile::write(ostream& ostream) {
+        // note: we should update header info and other stuff that may changed.
+        throw "Not f**king implemented";
         return 0;
     }
 

@@ -23,6 +23,11 @@ namespace MidiUtils {
         return 0;
     }
 
+    int MidiHeader::write(ostream& ostream) {
+        ostream.write((char*)&this->header, 14);
+		return 0;
+    }
+
     int MidiHeader::getFormat() const {
         return byte2_to_uint16(header.midiFormat);
     }

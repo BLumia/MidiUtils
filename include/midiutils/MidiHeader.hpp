@@ -12,6 +12,7 @@ namespace MidiUtils {
     public:
         MidiHeader();
         int read(istream& istream);
+        int write(ostream& ostream);
 
         int getFormat() const;
         int getTrackCount() const;

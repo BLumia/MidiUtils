@@ -21,33 +21,7 @@ namespace MidiUtils {
         extra = "";
         read(istream);
     }
-/*
-    MidiEvent::MidiEvent(uint32_t tickTime, byte rawType, uint32_t para1, uint32_t para2) {
-        this->rawType = rawType;
-        this->tick = tickTime;
-        this->para1 = para1;
-        this->para2 = para2;
-        extra = "";
-    }
 
-    MidiEvent::MidiEvent(uint32_t tickTime, byte rawType, byte rawMetaType, uint32_t para, std::string extra) {
-        char c;
-        memcpy(&c, &rawMetaType, 1);
-        this->rawType = rawType;
-        this->tick = tickTime;
-        this->para1 = c;
-        this->para2 = para;
-        this->extra = extra;
-    }
-
-    MidiEvent::MidiEvent(uint32_t tickTime, enum EventType type, uint32_t para1, uint32_t para2) {
-        throw "Not f**king implemented";
-    }
-
-    MidiEvent::MidiEvent(uint32_t tickTime, enum EventType type, uint32_t para, std::string extra) {
-        throw "Not f**king implemented";
-    }
-*/
     int MidiEvent::read(istream& istream) {
 
         char paraByte1, paraByte2;
@@ -138,6 +112,10 @@ namespace MidiUtils {
             }
 
         return 0;
+    }
+
+    int MidiEvent::write(ostream& ostream) {
+        throw "Not f**king implemented";
     }
 
     enum EventType MidiEvent::getType() const {

@@ -14,11 +14,9 @@ namespace MidiUtils {
     public:
         MidiEvent();
         MidiEvent(istream& istream);
-        //MidiEvent(uint32_t tickTime, byte rawType, uint32_t para1, uint32_t para2);
-        //MidiEvent(uint32_t tickTime, byte rawType, byte rawMetaType, uint32_t para, std::string extra);
-        //MidiEvent(uint32_t tickTime, enum EventType type, uint32_t para1, uint32_t para2);
-        //MidiEvent(uint32_t tickTime, enum EventType type, uint32_t para, std::string extra);
+
         int read(istream& istream);
+        int write(ostream& ostream);
         enum EventType getType() const;
         std::string toString() const;
 
