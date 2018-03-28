@@ -26,6 +26,7 @@ namespace MidiUtils {
         byte trackLengh[4];
     };
 
+	//! Midi Event Types
     enum EventType {
         E_INVALID = -1,
         E_META = -2,

@@ -7,6 +7,10 @@ using namespace std;
 
 namespace MidiUtils {
 
+	/*! \brief class of midi file header Struct
+	 * 
+	 * This class hold Standard Midi File header (`MThd` chunk) information.
+	 * */
     class MidiHeader {
 
     public:

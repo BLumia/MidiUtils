@@ -10,6 +10,10 @@ using namespace std;
 
 namespace MidiUtils {
 
+	/*! \brief class of a single track of a MidiFile
+	 * 
+	 * This class hold Standard Midi File header (`MTrk` chunk) information.
+	 * */
     class MidiTrack {
         
     public:

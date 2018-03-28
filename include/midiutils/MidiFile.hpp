@@ -12,6 +12,10 @@ using namespace std;
 
 namespace MidiUtils {
 
+	/*! \brief class of Standard Midi File
+	 * 
+	 * This class can parse and hold a MIDI file with Standard Midi File format.
+	 * */
     class MidiFile {
 
     public:
